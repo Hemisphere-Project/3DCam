@@ -1,0 +1,13 @@
+[Unit]
+Description=3dcam
+           
+[Service]
+Type=simple
+User=pi
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/local/bin/3dcam
+ExecStop=/bin/pkill 3dcam
+Restart=always
+           
+[Install]
+WantedBy=default.target

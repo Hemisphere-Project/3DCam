@@ -1,0 +1,3 @@
+to run exemple over ssh:
+
+DISPLAY=:0.0 python display_depth_frame.py
