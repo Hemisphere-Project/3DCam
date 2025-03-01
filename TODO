@@ -1,4 +1,0 @@
-
-
--> Exit 3DCam server on cam crash (to trigger systemd restart)
--> Exit 3DCam server if no data after X minutes (to trigger systemd restart)

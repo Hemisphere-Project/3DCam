@@ -1,6 +1,8 @@
 .venv
 venv
 
+librealsense/
+
 # Python
 *.pyc
 *.pyo

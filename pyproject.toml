@@ -8,8 +8,11 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 flask-socketio = "^5.5.1"
-
+eventlet = "^0.39.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

@@ -7,13 +7,20 @@ BASEPATH="$(dirname "$(readlink -f "$0")")"
 cd "$BASEPATH"
 
 # Dependencies
-sudo apt-get install python3-opencv python3-numpy python3-protobuf python3-venv 
+# sudo apt-get install python3-opencv python3-numpy python3-protobuf python3-venv 
 
-# Venv
+# Venv (legacy mode, now using poetry)
 # python3 -m venv --system-site-packages venv
 # source venv/bin/activate
 # pip install setuptools
 # pip install -r requirements.txt
+
+
+# TerraBee SDK :: TODO
+# wget https://www.terabee.com/wp-content/uploads/2020/06/TerraBee-SDK-1.0.0-Linux.zip OR use ./Redist
+
+# RealSense SDK
+
 
 # Poetry
 poetry install
