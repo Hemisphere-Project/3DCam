@@ -66,7 +66,7 @@ eventlet.spawn(camread)
 
 # Actually Start the App
 if __name__ == '__main__':
-    socketio.run(app, port=8000, host="0.0.0.0", debug=False)
+    socketio.run(app, port=8888, host="0.0.0.0", debug=False)
 
 
 cam.stop()
