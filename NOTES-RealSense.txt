@@ -1,4 +1,6 @@
 
+#### NOT UP TO DATE => CHECK ./install.sh !!!!
+
 sudo apt-get update && sudo apt-get dist-upgrade
 
 sudo apt-get install -y automake python3-protobuf libtbb-dev libtool cmake libusb-1.0-0-dev libx11-dev xorg-dev libglu1-mesa-dev libssl-dev clang llvm libatlas-base-dev python3-opencv
@@ -34,6 +36,7 @@ sudo make install
 
 unset CC
 unset CXX
+
 
 
 
