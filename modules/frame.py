@@ -78,8 +78,10 @@ class Frame:
     self._keypoints = list(detector.detect( self._frame_proc ))
 
     # Y_MIN (remove projection screen)
-    self.y_min = 30            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
+    self.y_min = 0            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
+    self.y_max = 400            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
     self._keypoints = [kp for kp in self._keypoints if kp.pt[1] > self.y_min]
+    self._keypoints = [kp for kp in self._keypoints if kp.pt[1] < self.y_max]
     
     # BLOBS
     blobs.update(self)
@@ -108,8 +110,10 @@ class Frame:
     frame_with_keypoints = cv2.drawKeypoints( self._frame_proc, self._keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
     # Draw y_min line
-    # print((0, self.y_min), (self.size[0]*self.scale, self.y_min), frame_with_keypoints.shape)
     frame_with_keypoints = cv2.line(frame_with_keypoints, (0, self.y_min), (self.size[0]*self.scale, self.y_min), (0,0,255), 1)    
+    
+    # Draw y_max line
+    frame_with_keypoints = cv2.line(frame_with_keypoints, (0, self.y_max), (self.size[0]*self.scale, self.y_max), (0,0,255), 1)
 
     # Detected blobs 
     for c, b in enumerate(blobs.export()):

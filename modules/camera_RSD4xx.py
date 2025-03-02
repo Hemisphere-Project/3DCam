@@ -59,7 +59,7 @@ class Camera:
         # print(f"min: {np.min(depth_raw)}, max: {np.max(depth_raw)}, avg: {np.mean(depth_raw)}")
         
         # Trimming
-        max_distance = 600            ################################################################
+        max_distance = 1200            ################################################################
         min_distance = 100            ################################################################
         
         depth_raw[ depth_raw == 0 ] = max_distance
