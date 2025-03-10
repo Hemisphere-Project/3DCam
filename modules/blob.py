@@ -84,7 +84,7 @@ class Blob:
             
             
     def coord(self):
-        return { 'x':self.x, 'y':self.y, 'z':self.z } 
+        return { 'x':self.x, 'y':self.y, 'z':self.z, 'r': int(self.size/2) }
       
 
 ##

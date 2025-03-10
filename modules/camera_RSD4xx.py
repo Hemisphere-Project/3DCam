@@ -3,6 +3,7 @@ import numpy as np
 import os, sys
 import pyrealsense2 as rs2
 import cv2
+import time
 
 from modules.frame import Frame
 
@@ -15,7 +16,10 @@ class Camera:
         self.profile = None
         self.colorizer = rs2.colorizer()
         
-        self.size = (640, 480)
+        self.size = (640, 480) 
+        
+        self.fps = 5    
+        self._lastTime = 0
         
         self.data_raw = None
         self.data_norm = None
@@ -28,6 +32,16 @@ class Camera:
             self.profile = self.pipe.start(cfg)
         
     def read(self):
+        
+        # Limit FPS
+        currTime = time.time()
+        elapsedTime = currTime - self._lastTime
+        sleepTime = 1.0/self.fps - elapsedTime
+        if sleepTime > 0:
+            # print(f'Sleeping for {sleepTime}')
+            sys.stdout.flush()
+            time.sleep(sleepTime)
+        self._lastTime = time.time()
         
         # Read FAKE data
         if self.fake:

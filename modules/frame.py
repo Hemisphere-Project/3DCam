@@ -81,6 +81,7 @@ class Frame:
     self.y_min = 0            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
     self.y_max = 400            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
     self._keypoints = [kp for kp in self._keypoints if kp.pt[1] > self.y_min]
+    
     self._keypoints = [kp for kp in self._keypoints if kp.pt[1] < self.y_max]
     
     # BLOBS
@@ -105,7 +106,7 @@ class Frame:
   def render(self):
     
     
-    # Draw detected keypoints as red circles.
+    # Draw detected keypoints as blue circles.
     # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
     frame_with_keypoints = cv2.drawKeypoints( self._frame_proc, self._keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
