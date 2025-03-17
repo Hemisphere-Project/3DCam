@@ -26,6 +26,7 @@ def root():
 @socketio.on('connect')
 def connect():
     print('Client connected')
+    socketio.emit('3Dcam-CONF', cam.conf())
 
 # Join a room    
 @socketio.on("join")
@@ -38,9 +39,15 @@ def on_join(room):
 def message_recieved(event, sid, *args):
     print(f'catch_all(event={event}, sid={sid}, args={args})')
     socketio.emit('3Dcam-ECHO', {'event': event, 'args': args})   
+
+# Conf
+@socketio.on('3Dcam-CONF')
+def conf(data):
+    print('3Dcam-CONF', data)
+    cam.conf(data)
     
 
-cam = Camera(fake=False)
+cam = Camera(fake=False, conffile='/data/3dcam.json')
 
 
 def camread():
@@ -54,12 +61,11 @@ def camread():
         # socketio.emit('3Dcam-NORM', cam.norm.tobytes(), room='NORM')
         
         if cam.frame:
-            socketio.emit('3Dcam-BLOBS', cam.blobs, room='BLOBS')
+            socketio.emit('3Dcam-BLOBS', cam.blobs(), room='BLOBS')
             socketio.emit('3Dcam-VISU-RAW', cam.frame.raw().tobytes(), room='VISU-RAW')
-            socketio.emit('3Dcam-VISU-PROC', cam.frame.render().tobytes(), room='VISU-PROC')
+            socketio.emit('3Dcam-VISU-PROC', cam.view().tobytes(), room='VISU-PROC')
         
         eventlet.sleep(1/33)
-        
 
 eventlet.spawn(camread)
 

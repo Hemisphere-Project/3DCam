@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 
-from modules.blob import BlobsPool
-from modules.detector import make_detector
+
 
 
 def maximize(data, depth=1):
@@ -24,20 +23,18 @@ def meanimize(data, depth=2):
 meanimize.frames = []
 
 
-# Common detector
-#
-detector = make_detector(min_area=350, max_area=6000)    ################### SIZE OF DETECTED BLOB ####################
-
-# Common BlobsPool
-#
-blobs = BlobsPool( liveness=4, z_smooth=4)    ############################# LIVENESS OF BLOB + Z_SMOOTH ##############
-
 
 class Frame:
   
-  def __init__(self, data_norm, scale, size, seq):
-    self.scale = scale
+  def __init__(self, data_norm, size, conf):
+    self.conf = conf
+    
+    if 'flip' not in self.conf: self.conf['flip'] = (False, False)
+    if 'erode' not in self.conf: self.conf['erode'] = 0
+    if 'dilate' not in self.conf: self.conf['dilate'] = 0
+    
     self.size = size
+    self.scale = 1
     rs_size = (size[1], size[0])
     
     # Raw data
@@ -51,45 +48,24 @@ class Frame:
     # self._frame_raw = maximize(self._frame_raw, 1)              ################################### NUMBER OF FRAMES TO MAXIMIZE AGAINST ##############
     # self._frame_raw = meanimize(self._frame_raw, 1)           ################################### NUMBER OF FRAMES TO AVERAGE AGAINST  ##############
     self._frame_raw = self._frame_raw.reshape( rs_size )
-    self._frame_raw = np.fliplr(self._frame_raw)
-    # self._frame_raw = np.flipud(self._frame_raw)
-    
+    if self.conf['flip'][0]:
+      self._frame_raw = np.fliplr(self._frame_raw)
+    if self.conf['flip'][1]:
+      self._frame_raw = np.flipud(self._frame_raw)
 
     # Processed frame
     self._frame_proc = self._frame_raw.copy()
     self._frame_proc = cv2.bitwise_not(self._frame_proc)  # Invert
     self._frame_proc = self._frame_proc.astype(np.uint8)  # Convert to 8bit
     
-    # self._frame_proc = cv2.erode(self._frame_proc, np.ones((2,2),np.uint8) ,iterations = 1)   ############# ERODE SIZE & ITERATIONS ############
-    # self._frame_proc = cv2.dilate(self._frame_proc,np.ones((1,1),np.uint8) ,iterations = 1)   ############# DILATE SIZE & ITERATIONS ############
+    if self.conf['erode'] > 0:
+      self._frame_proc = cv2.erode(self._frame_proc, np.ones((2,2),np.uint8) ,iterations = self.conf['erode'])   ############# ERODE SIZE & ITERATIONS ############
+    if self.conf['dilate'] > 0:
+      self._frame_proc = cv2.dilate(self._frame_proc,np.ones((2,2),np.uint8) ,iterations = self.conf['dilate'])   ############# DILATE SIZE & ITERATIONS ############
     
-    if scale != 1:
-      self._frame_proc = cv2.resize(self._frame_proc, (size[1]*scale, size[0]*scale), interpolation=cv2.INTER_AREA)  # Resize
-
-    if (seq % 60 == 0):
-      print('_raw_data:', self._raw_data.shape)
-      print('_frame_raw:', self._frame_raw.shape)
-      print('_frame_proc:', self._frame_proc.shape)
-      print('------------------')
+    if self.scale != 1:
+      self._frame_proc = cv2.resize(self._frame_proc, (size[1]*self.scale, size[0]*self.scale), interpolation=cv2.INTER_AREA)  # Resize
     
-    # KEYPOINTS
-    # detector.empty()
-    self._keypoints = []
-    self._keypoints = list(detector.detect( self._frame_proc ))
-
-    # Y_MIN (remove projection screen)
-    self.y_min = 0            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
-    self.y_max = 400            ################################################ IGNORE BLOBS BELOW Y_MIN ##############################
-    self._keypoints = [kp for kp in self._keypoints if kp.pt[1] > self.y_min]
-    
-    self._keypoints = [kp for kp in self._keypoints if kp.pt[1] < self.y_max]
-    
-    # BLOBS
-    blobs.update(self)
-  
-  
-  def keypoints(self):
-    return self._keypoints
   
   def raw(self):
     return self._frame_raw
@@ -97,24 +73,15 @@ class Frame:
   def processed(self):
     return self._frame_proc
   
-  def blobs(self):
-    return blobs
-  
-  def detector(self):
-    return detector
-  
-  def render(self):
-    
+  def render(self, blobs, keypoints=[], borders=((0,0), (0,0))):
     
     # Draw detected keypoints as blue circles.
     # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
-    frame_with_keypoints = cv2.drawKeypoints( self._frame_proc, self._keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    frame_with_keypoints = cv2.drawKeypoints( self._frame_proc, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     
-    # Draw y_min line
-    frame_with_keypoints = cv2.line(frame_with_keypoints, (0, self.y_min), (self.size[0]*self.scale, self.y_min), (0,0,255), 1)    
-    
-    # Draw y_max line
-    frame_with_keypoints = cv2.line(frame_with_keypoints, (0, self.y_max), (self.size[0]*self.scale, self.y_max), (0,0,255), 1)
+    # Draw inner borders
+    borders = ((borders[0][0]*self.scale, borders[0][1]*self.scale), (borders[1][0]*self.scale-1, borders[1][1]*self.scale-1))
+    frame_with_keypoints = cv2.rectangle(frame_with_keypoints, borders[0], borders[1], (0,0,255), 1)
 
     # Detected blobs 
     for c, b in enumerate(blobs.export()):

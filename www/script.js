@@ -118,3 +118,99 @@ function scaleImageData(imageData, scale)
   }
   return scaled;
 }
+
+// Fill Conf
+socket.on('3Dcam-CONF', (data) => {
+  // clear conf id
+  document.getElementById('conf').innerHTML = '';
+
+  // foreach conf: append key as label, then input number for value or values
+  for (const [key, value] of Object.entries(data)) {
+
+    let confBox = document.createElement('div');
+    confBox.setAttribute('class', 'confBox');
+    document.getElementById('conf').appendChild(confBox);
+
+    // console.log(`${key}: ${value}`);
+    let label = document.createElement('label');
+    label.setAttribute('for', key);
+    label.innerHTML = key;
+    confBox.appendChild(label);
+
+    if (typeof value === 'number') {
+      let input = document.createElement('input');
+      input.setAttribute('type', 'number');
+      input.setAttribute('id', key);
+      input.setAttribute('name', key);
+      input.setAttribute('value', value);
+      confBox.appendChild(input);
+      input.onchange = sendConf
+    } else {
+      for (const [i, v] of value.entries()) {
+        if (typeof v === 'number') {
+          let input = document.createElement('input');
+          input.setAttribute('type', 'number');
+          input.setAttribute('id', key + i);
+          input.setAttribute('name', `${key}[${i}]`);
+          input.setAttribute('value', v);
+          confBox.appendChild(input);
+          input.onchange = sendConf
+        }
+        else {
+          for (const [j, v2] of v.entries()) {
+            let input = document.createElement('input');
+            input.setAttribute('type', 'number');
+            input.setAttribute('id', key + i + j);
+            input.setAttribute('name', `${key}[${i}][${j}]`);
+            input.setAttribute('value', v2);
+            confBox.appendChild(input);
+            input.onchange = sendConf
+          }
+        }
+      }
+    }
+  }
+})
+
+function sendConf() {
+  let data = {}
+  let inputs = document.getElementsByTagName('input')
+  for (let i = 0; i < inputs.length; i++) {
+    // use input name 
+    let name = inputs[i].name
+    let value = parseFloat(inputs[i].value)
+    
+    let keys = name.split(/[\[\]]+/)
+
+    // remove empty strings
+    keys = keys.filter(function(e) { return e !== '' })
+
+    // remove first element
+    mkey = keys.shift()
+
+    // direct value
+    if (keys.length == 0) {
+      data[mkey] = value
+    }
+
+    // build multi dimensional array in data[mkey]
+    else {
+      if (!(mkey in data)) data[mkey] = []
+
+      let warr = data[mkey]
+      for (let j = 0; j < keys.length; j++) {
+        let knum = parseInt(keys[j])
+        if (j == keys.length - 1) {
+          warr[knum] = value
+        }
+        else {
+          if (!(knum in warr)) warr[knum] = []
+          warr = warr[knum]
+        }
+      }
+    }
+  }
+  socket.emit('3Dcam-CONF', data)
+  // console.log(data)
+}
+  

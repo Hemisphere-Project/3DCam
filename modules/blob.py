@@ -94,19 +94,19 @@ class Blob:
 class BlobsPool():
   
     def __init__(self, liveness=10, z_smooth=1):
-      self.liveness_max = liveness
-      self.z_smooth = z_smooth
+      self.liveness_max = max(1, liveness)
+      self.z_smooth = max(1, z_smooth)
       self.allblobs = []
     
     
-    def update(self, frame):
+    def update(self, frame, keypoints):
       
       # Decreament liveness
       for b in self.allblobs:
           b.decrease()
       
       # Update new keypoints from detector
-      for kp in frame.keypoints():
+      for kp in keypoints:
           found = False
           for b in self.allblobs:
               if b.in_range(kp):

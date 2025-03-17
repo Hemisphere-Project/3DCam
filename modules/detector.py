@@ -1,7 +1,7 @@
 import cv2
 
 
-def make_detector(min_area=1000, max_area=7000):
+def make_detector(area_range=(1000, 7000)):
   
   # Setup SimpleBlobDetector parameters.
   params = cv2.SimpleBlobDetector_Params()
@@ -15,8 +15,8 @@ def make_detector(min_area=1000, max_area=7000):
   
   # Filter by Area.
   params.filterByArea = True
-  params.minArea = min_area
-  params.maxArea = max_area
+  params.minArea = area_range[0]
+  params.maxArea = area_range[1]
   
   # Filter by Circularity
   params.filterByCircularity = False

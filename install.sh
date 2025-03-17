@@ -18,7 +18,6 @@ cd librealsense
 ./scripts/setup_udev_rules.sh
 udevadm control --reload-rules
 udevadm trigger
-
 export CC=/usr/bin/clang
 export CXX=/usr/bin/clang++
 mkdir build && cd build
@@ -34,7 +33,7 @@ unset CC
 unset CXX
 cd "$BASEPATH"
 
-
+# Service
 ln -sf "$BASEPATH/3dcam" /usr/local/bin/
 ln -sf "$BASEPATH/3dcam.service" /etc/systemd/system/
 systemctl daemon-reload

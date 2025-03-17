@@ -1,12 +1,6 @@
 
 body {
-  padding: 0;
-  margin: 0;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  background-color: black;
 }
 
 #container{
@@ -20,3 +14,24 @@ body {
   padding: 20px;
 }
 
+/* new line foreach label */
+#conf {
+  /* white-space: pre-line; */
+}
+
+#conf .confBox {
+  display: inline-block;
+  padding: 5px 8px;
+  margin-right: 4px;
+  border: 1px solid #111;
+  background-color: #333;
+}
+
+#conf label {
+  margin-right: 5px;
+}
+
+#conf input {
+  width: 55px;
+  padding: 3px;
+}
