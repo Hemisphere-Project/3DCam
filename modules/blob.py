@@ -3,7 +3,8 @@ import numpy as np
 
 
 class Blob:
-    def __init__(self, kp, liveness_max, z_smooth):
+    def __init__(self, kp, liveness_max, z_smooth, c):
+        self.counter = c
         self.z_cache = []
         self.liveness = 1
         self.liveness_max = liveness_max
@@ -23,13 +24,15 @@ class Blob:
             self.liveness -= 1
     
     def in_range(self, kp):
+        RANGER_TOLERANCE = 0.8
+        
         if type(kp) == Blob:
             if kp.alive():
-                return math.sqrt((self.x - kp.x)**2 + (self.y - kp.y)**2) < self.size/2
+                return math.sqrt((self.x - kp.x)**2 + (self.y - kp.y)**2) < self.size*RANGER_TOLERANCE/2
             else:
-                return math.sqrt((self.x - kp.x)**2 + (self.y - kp.y)**2) < self.size
+                return math.sqrt((self.x - kp.x)**2 + (self.y - kp.y)**2) < self.size*RANGER_TOLERANCE/2
         else:
-            return math.sqrt((self.x - kp.pt[0])**2 + (self.y - kp.pt[1])**2) < (self.size + kp.size)
+            return math.sqrt((self.x - kp.pt[0])**2 + (self.y - kp.pt[1])**2) < (self.size/2 + kp.size/2)*RANGER_TOLERANCE
     
     def merge(self, b):
         self.x = (self.x + b.x)/2
@@ -97,6 +100,7 @@ class BlobsPool():
       self.liveness_max = max(1, liveness)
       self.z_smooth = max(1, z_smooth)
       self.allblobs = []
+      self.counter = 0
     
     
     def update(self, frame, keypoints):
@@ -112,9 +116,13 @@ class BlobsPool():
               if b.in_range(kp):
                   b.absorb(kp)
                   found = True
+                  #print("Keypoint", kp.pt, "attached to blob", b.counter)
                   break
           if not found:
-              self.allblobs.append(Blob(kp, self.liveness_max, self.z_smooth))
+              self.allblobs.append(Blob(kp, self.liveness_max, self.z_smooth, self.counter))
+              #print("Keypoint", kp.pt, "attached to new blob", self.counter)
+              self.counter += 1
+            
       
       # Remove dead blobs
       for b in self.allblobs:

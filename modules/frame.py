@@ -88,7 +88,7 @@ class Frame:
         # print ('blob'+str(c), b)
 
         # Draw as green circles.
-        frame_with_keypoints = cv2.circle(frame_with_keypoints, (int(b['x']), int(b['y'])), 10, (0, 255, 0) , 2)
+        frame_with_keypoints = cv2.circle(frame_with_keypoints, (int(b['x']), int(b['y'])), int(b['r']), (0, 255, 0) , 2)
         frame_with_keypoints = cv2.putText(frame_with_keypoints, str(b['x'])+' '+str(b['y'])+' '+str(b['z']), (int(b['x'])+15, int(b['y'])), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
         
     return frame_with_keypoints        

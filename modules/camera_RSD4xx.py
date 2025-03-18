@@ -149,6 +149,7 @@ class Camera:
                 with open(self.conffile, 'w') as f:
                     # pretty print the dictionary
                     json.dump(self._conf, f, indent=4)
+                print('Conf file saved', self.conffile)
             except:
                 print('Error saving conf file', self.conffile)
         return self._conf
