@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import os
 import eventlet
 eventlet.monkey_patch()
 
@@ -9,7 +9,7 @@ from modules.camera_RSD4xx import Camera
 from flask import *
 from flask_socketio import *
 
-# import modules.blob as blob
+CAM_RUNNING = True
 
 # Init the server
 app = Flask(__name__, static_folder='www')
@@ -45,27 +45,41 @@ def message_recieved(event, sid, *args):
 def conf(data):
     print('3Dcam-CONF', data)
     cam.conf(data)
+
+@socketio.on('startCam')
+def startCam():
+    global CAM_RUNNING
+    CAM_RUNNING = True
+    print("CAM_RUNNING = True")
+
+@socketio.on('stopCam')
+def stopCam():
+    global CAM_RUNNING
+    CAM_RUNNING = False
+    print("CAM_RUNNING = False")
+
+@socketio.on('rebootCam')
+def rebootCam():
+    print("Rebooting the system...")
+    os.system("reboot")
     
 
 cam = Camera(fake=False, conffile='/data/3dcam.json')
 
 
 def camread():
+    print("\n============ 3DCAM SERVER STARTED ============\n")
     while True:
-        
-        # Read RAW
-        cam.read()
-        
-        # Send DATA                
-        # socketio.emit('3Dcam-RAW', cam.raw.tobytes(), room='RAW')
-        # socketio.emit('3Dcam-NORM', cam.norm.tobytes(), room='NORM')
-        
-        if cam.frame:
-            socketio.emit('3Dcam-BLOBS', cam.blobs(), room='BLOBS')
-            socketio.emit('3Dcam-VISU-RAW', cam.frame.raw().tobytes(), room='VISU-RAW')
-            socketio.emit('3Dcam-VISU-PROC', cam.view().tobytes(), room='VISU-PROC')
-        
-        eventlet.sleep(1/33)
+        if CAM_RUNNING:
+            cam.read()
+            
+            if cam.frame:
+                socketio.emit('3Dcam-BLOBS', cam.blobs(), room='BLOBS')
+                socketio.emit('3Dcam-VISU-RAW', cam.frame.raw().tobytes(), room='VISU-RAW')
+                socketio.emit('3Dcam-VISU-PROC', cam.view().tobytes(), room='VISU-PROC')
+            
+        else:
+            eventlet.sleep(1)
 
 eventlet.spawn(camread)
 
